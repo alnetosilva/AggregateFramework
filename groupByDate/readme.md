@@ -281,3 +281,5 @@ db.teste.aggregate([
 ]).pretty()
 
 ```
+
+## https://docs.mongodb.com/manual/reference/operator/aggregation/#date-expression-operators
