@@ -282,4 +282,5 @@ db.teste.aggregate([
 
 ```
 
-## https://docs.mongodb.com/manual/reference/operator/aggregation/#date-expression-operators
+## Fonte:
+<https://docs.mongodb.com/manual/reference/operator/aggregation/#date-expression-operators>
