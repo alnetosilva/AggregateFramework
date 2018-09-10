@@ -1,4 +1,11 @@
+# MongoDB Agreggate, contando ocorrencias de um indice em multiplos fields
 
+Nesse exemplo, vou mostrar como podemos buscar ocorrencias de um determinado indice em fields diversos.
+
+## Inserindo a massa de dados:
+Inicialmente vou inserir uma massa de dados:
+
+```
 db.teste.insertMany([
   {
     user: "USER1",
@@ -25,26 +32,43 @@ db.teste.insertMany([
     last: null
   }
 ])
+```
 
-    //First we'll extract only what we need find, on this case distinct users
-    db.teste.aggregate([
-      {$group:{
-        _id: "$user"
-      }}
-    ])
+## Loading...
 
-    //Aqui vamos pegar os indices da busca reinserir no nosso filtro
-    db.teste.aggregate([
-      {$group:{
-        _id: "$user"
-      }},
-      {$lookup:{
-        from: "teste",
-        let: { indice: "$_id" },
-        pipeline: [],
-        as: "res"
-      }}
-    ])
+Primeiro vamos extrair nosso valor indice de pesquisa.
+
+```
+db.teste.aggregate([
+  {$group:{
+    _id: "$user"
+  }}
+])
+```
+Pronto, temos dois indices de busca para contarmos em nossos fields.
+
+Retorno:
+```
+{ "_id" : "USER2" }
+{ "_id" : "USER1" }
+
+```
+
+Agora que já temos a nossa base de procura, vamos reinserir nossos documentos na busca.
+
+```
+db.teste.aggregate([
+  {$group:{
+    _id: "$user"
+  }},
+  {$lookup:{
+    from: "teste",
+    let: { indice: "$_id" },
+    pipeline: [],
+    as: "res"
+  }}
+])
+```
 
     //Vamos contrar o total de elementos reinseridos
     db.teste.aggregate([
