@@ -185,6 +185,7 @@ Agora vamos detalhar em frações de hora usando $mod (sobra da divisão). Para 
 
 Por ex. vamos pegar amostras de 30 em 30 min:
 
+```
 db.teste.aggregate([
   {$group:{
     _id: {
