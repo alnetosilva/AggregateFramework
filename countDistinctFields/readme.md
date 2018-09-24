@@ -55,6 +55,7 @@ Retorno:
 ```
 
 Agora que já temos a nossa base de procura, vamos reinserir nossos documentos na busca.
+Vou usar o operador $lookup de uma forma mais dinâmica, com "let" e "pipeline"
 
 ```
 db.teste.aggregate([
@@ -69,24 +70,61 @@ db.teste.aggregate([
   }}
 ])
 ```
+Como o próprio nome já diz, o pipeline é um novo estagio de processamento. No entanto, para cada ocorrencia retornada no lookup do $lookup.
+Assim, o "let" declara uma variavel local para ser usada nesse momento:
 
-    //Vamos contrar o total de elementos reinseridos
-    db.teste.aggregate([
+```
+db.teste.aggregate([
+  {$group:{
+    _id: "$user"
+  }},
+  {$lookup:{
+    from: "teste",
+    let: { indice: "$_id" },
+    pipeline: [
       {$group:{
-        _id: "$user"
-      }},
-      {$lookup:{
-        from: "teste",
-        let: { indice: "$_id" },
-        pipeline: [
-          {$group:{
-            _id: null,
-            total:{$sum:1}
-          }}
-        ],
-        as: "res"
+        _id: "$$indice",
+        total:{$sum:1}
       }}
-    ])
+    ],
+    as: "res"
+  }}
+])
+```
+O resultado até o momento conta com o total de documentos como valor da soma.
+Resultado:
+
+```
+{ "_id" : "USER2", "res" : [ { "_id" : "USER2", "total" : 6 } ] }
+{ "_id" : "USER1", "res" : [ { "_id" : "USER1", "total" : 6 } ] }
+
+```
+Em uma colleção muito grande a quantidade de documentos processados pode facilmente ultrapassar o limite de 16MB do MongoDB. Por isso, vamos limitar nosso relacionamento:
+
+```
+db.teste.aggregate([
+  {$group:{
+    _id: "$user"
+  }},
+  {$lookup:{
+    from: "teste",
+    let: { indice: "$_id" },
+    pipeline: [
+      {$match:{
+        $or:[
+          {eq: ["$user", "$$indice"] },
+          {eq: ["$last", "$$indice"] }
+        ]
+      }},
+      {$group:{
+        _id: "$$indice",
+        total: { $sum: 1 }
+      }}
+    ],
+    as: "res"
+  }}
+])
+```
 
     //Agora vamos testar uma cond verdadeira
     db.teste.aggregate([
